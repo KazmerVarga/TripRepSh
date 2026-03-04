@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trip Report Dashboard</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --border: #2a2a3d;
+    --accent: #7c6dfa;
+    --accent2: #fa6d8f;
+    --accent3: #6dfacc;
+    --text: #e8e8f0;
+    --muted: #6b6b85;
+    --yes: #6dfacc;
+    --no: #fa6d8f;
+    --unclear: #fad06d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; }
+
+  /* ── HEADER ── */
+  .dash-header {
+    background: linear-gradient(135deg, #13131a 0%, #1a1a2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 2.5rem 1.5rem;
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(20px);
+  }
+  .dash-header h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; }
+  .dash-header h1 span { color: var(--accent); }
+  .total-badge {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 999px; padding: 0.25rem 1rem;
+    font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--accent3);
+  }
+
+  /* ── FILTERS ── */
+  /* ── LAYOUT ── */
+  .dash-layout { display: flex; min-height: calc(100vh - 64px); }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 260px; flex-shrink: 0;
+    background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: sticky; top: 64px; height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .sidebar-header {
+    padding: 1rem 1.25rem 0.75rem;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border); position: sticky; top: 0;
+    background: var(--surface); z-index: 1;
+  }
+  .sidebar-header span { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+  .btn-reset {
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    border-radius: 6px; padding: 0.25rem 0.6rem; font-family: 'DM Mono', monospace;
+    font-size: 0.72rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-reset:hover { border-color: var(--accent2); color: var(--accent2); }
+  .filter-list { padding: 0.75rem 0; }
+  .filter-group { padding: 0.5rem 1.25rem; }
+  .filter-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.3rem; }
+  select.filter-select {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 7px; padding: 0.35rem 2rem 0.35rem 0.65rem; font-family: 'DM Mono', monospace;
+    font-size: 0.78rem; cursor: pointer; outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b85' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.6rem center;
+    transition: border-color 0.2s;
+  }
+  select.filter-select:focus { border-color: var(--accent); }
+  .active-indicator {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); margin-left: 6px; vertical-align: middle; display: none;
+  }
+  select.filter-select.has-value { border-color: var(--accent); }
+
+  /* ── MOBILE SIDEBAR ── */
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 200; backdrop-filter: blur(4px);
+  }
+  .sidebar-overlay.open { display: block; }
+  .btn-filter-toggle {
+    display: none; background: var(--accent); border: none; color: white;
+    border-radius: 10px; padding: 0.5rem 1rem; font-family: 'DM Mono', monospace;
+    font-size: 0.8rem; cursor: pointer; align-items: center; gap: 0.5rem;
+  }
+  .filter-badge {
+    background: var(--accent2); color: white; border-radius: 999px;
+    padding: 0.1rem 0.45rem; font-size: 0.65rem; font-weight: 700;
+    display: none;
+  }
+  .filter-badge.visible { display: inline; }
+
+  /* ── CONTENT ── */
+  .dash-content { flex: 1; min-width: 0; padding: 1.75rem 2rem; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .dash-layout { flex-direction: column; }
+    .sidebar {
+      position: fixed; top: 0; left: -280px; width: 260px; height: 100vh;
+      z-index: 201; transition: left 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    .sidebar.mobile-open { left: 0; }
+    .btn-filter-toggle { display: flex; }
+    .dash-content { padding: 1rem; }
+    .dash-header { padding: 1rem 1rem 0.75rem; }
+    .dash-header h1 { font-size: 1.2rem; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .chart-grid { grid-template-columns: 1fr; }
+    .bar-grid { grid-template-columns: 1fr; }
+    .heatmap-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ── MAIN ── */
+  .dash-main { }
+
+  /* ── STAT CARDS ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1.25rem 1rem; text-align: center; transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--accent); }
+  .stat-card .val { font-size: 2rem; font-weight: 800; line-height: 1; color: var(--accent3); font-family: 'DM Mono', monospace; }
+  .stat-card .lbl { font-size: 0.7rem; color: var(--muted); margin-top: 0.35rem; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* ── CHART GRID ── */
+  .chart-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+  .chart-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .chart-card:hover { border-color: var(--accent); }
+  .chart-card h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1rem; }
+  .chart-card canvas { max-height: 220px; }
+
+  /* ── BAR ROWS ── */
+  .bar-section { margin-bottom: 2rem; }
+  .bar-section h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  .bar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem; }
+  .bar-row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1rem; }
+  .bar-row-label { font-size: 0.72rem; color: var(--text); margin-bottom: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-row-bars { display: flex; flex-direction: column; gap: 0.3rem; }
+  .bar-item { display: flex; align-items: center; gap: 0.5rem; }
+  .bar-item-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); width: 50px; text-align: right; flex-shrink: 0; }
+  .bar-item-track { flex: 1; background: var(--surface2); border-radius: 4px; height: 8px; overflow: hidden; }
+  .bar-item-fill { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+  .bar-item-pct { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); width: 36px; flex-shrink: 0; }
+  .fill-yes { background: var(--yes); }
+  .fill-no  { background: var(--no); }
+  .fill-unclear { background: var(--unclear); }
+  .fill-other { background: var(--accent); }
+
+  /* ── LOADING ── */
+  .loading-overlay {
+    position: fixed; inset: 0; background: var(--bg); z-index: 999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+  }
+  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+
+  /* ── ERROR ── */
+  .error-box { background: #2a1020; border: 1px solid var(--accent2); border-radius: 12px; padding: 1.5rem; color: var(--accent2); font-family: 'DM Mono', monospace; font-size: 0.85rem; }
+
+  /* ── ASC HEATMAP ── */
+  .heatmap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; }
+  .heatmap-cell {
+    border-radius: 8px; padding: 0.6rem 0.8rem;
+    display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid transparent; transition: border-color 0.2s;
+  }
+  .heatmap-cell:hover { border-color: var(--accent); }
+  .heatmap-cell .hm-label { font-size: 0.68rem; color: var(--text); max-width: 130px; line-height: 1.3; }
+  .heatmap-cell .hm-pct { font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 600; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Connecting to Supabase…</div>
+</div>
+
+<!-- HEADER -->
+<div class="dash-header">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <h1>🍄 Trip Report <span>Dashboard</span></h1>
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn-filter-toggle" onclick="toggleMobileSidebar()">
+        ⚙ Filters <span class="filter-badge" id="filterBadge">0</span>
+      </button>
+      <span class="total-badge" id="totalBadge">— records</span>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY for mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
+<div class="dash-layout">
+<!-- SIDEBAR FILTERS -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span>Filters</span>
+    <button class="btn-reset" onclick="resetFilters()">↺ Reset all</button>
+  </div>
+  <div class="filter-list">
+    <div class="filter-group">
+      <div class="filter-label">Consumed Psilocybin</div>
+      <select class="filter-select" id="f_clearly_consumed_psilocybin">
+        <option value="">All</option><option value="yes">yes</option><option value="no">no</option><option value="unclear">unclear</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Prior Use</div>
+      <select class="filter-select" id="f_prior_psilocybin_use">
+        <option value="">All</option><option value="yes">yes</option><option value="no">no</option><option value="unknown">unknown</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Other Substances</div>
+      <select class="filter-select" id="f_used_other_substances_during">
+        <option value="">All</option><option value="yes">yes</option><option value="no">no</option><option value="unknown">unknown</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Recent Prior Use (&lt;2w)</div>
+      <select class="filter-select" id="f_recent_prior_use_under_2_weeks">
+        <option value="">All</option><option value="yes">yes</option><option value="no">no</option><option value="unknown">unknown</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Overall Positive</div>
+      <select class="filter-select" id="f_overall_positive_experience">
+        <option value="">All</option><option value="yes">yes</option><option value="no">no</option><option value="unclear">unclear</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Would Repeat</div>
+      <select class="filter-select" id="f_would_repeat">
+        <option value="">All</option><option value="yes">yes</option><option value="no">no</option><option value="unclear">unclear</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Never Again</div>
+      <select class="filter-select" id="f_never_again_statement">
+        <option value="">All</option><option value="yes">yes</option><option value="no">no</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Set &amp; Setting</div>
+      <select class="filter-select" id="f_set_and_setting_mentioned">
+        <option value="">All</option><option value="yes good">yes good</option><option value="yes bad">yes bad</option><option value="no or unsure">no or unsure</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Difficult Experience</div>
+      <select class="filter-select" id="f_had_difficult_challenging_experience">
+        <option value="">All</option><option value="yes">yes</option><option value="no">no</option><option value="unclear">unclear</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Therapeutic Intent</div>
+      <select class="filter-select" id="f_mentions_therapeutic_intent">
+        <option value="">All</option><option value="yes">yes</option><option value="no">no</option><option value="not the intent">not the intent</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Dose</div>
+      <select class="filter-select" id="f_mentions_dose">
+        <option value="">All</option><option value="5g or more">5g or more</option><option value="3.5-5g">3.5-5g</option><option value="2-3.5g">2-3.5g</option><option value="0.5-2g">0.5-2g</option><option value="0.5g or less">0.5g or less</option><option value="no">not mentioned</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Duration</div>
+      <select class="filter-select" id="f_experience_duration_mentioned">
+        <option value="">All</option><option value="1-2hours">1-2h</option><option value="2-4hours">2-4h</option><option value="4-6hours">4-6h</option><option value="6+hours">6+h</option><option value="no">not mentioned</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Time Loop</div>
+      <select class="filter-select" id="f_time_appeared_to_loop">
+        <option value="">All</option><option value="yes">yes</option><option value="no">no</option><option value="unknown">unknown</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">What Went Wrong</div>
+      <select class="filter-select" id="f_knows_what_went_wrong_if_any">
+        <option value="">All</option><option value="yes set">yes set</option><option value="yes setting">yes setting</option><option value="yes dosage">yes dosage</option><option value="no">no</option><option value="unknown">unknown</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Solo / Group</div>
+      <select class="filter-select" id="f_solo_or_group">
+        <option value="">All</option><option value="solo">solo</option><option value="group">group</option><option value="unknown">unknown</option>
+      </select>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="dash-content">
+<div id="dashMain" style="display:none">
+
+  <!-- STAT CARDS -->
+  <div class="stat-grid" id="statGrid"></div>
+
+  <!-- MAIN CHARTS — all 15 Section A fields -->
+  <div class="chart-grid" id="chartGrid">
+    <div class="chart-card"><h3>Consumed Psilocybin</h3><canvas id="c_clearly_consumed_psilocybin"></canvas></div>
+    <div class="chart-card"><h3>Prior Use</h3><canvas id="c_prior_psilocybin_use"></canvas></div>
+    <div class="chart-card"><h3>Other Substances</h3><canvas id="c_used_other_substances_during"></canvas></div>
+    <div class="chart-card"><h3>Recent Prior Use (&lt;2w)</h3><canvas id="c_recent_prior_use_under_2_weeks"></canvas></div>
+    <div class="chart-card"><h3>Overall Experience</h3><canvas id="c_overall_positive_experience"></canvas></div>
+    <div class="chart-card"><h3>Would Repeat</h3><canvas id="c_would_repeat"></canvas></div>
+    <div class="chart-card"><h3>Never Again</h3><canvas id="c_never_again_statement"></canvas></div>
+    <div class="chart-card"><h3>Set &amp; Setting</h3><canvas id="c_set_and_setting_mentioned"></canvas></div>
+    <div class="chart-card"><h3>Difficult Experience</h3><canvas id="c_had_difficult_challenging_experience"></canvas></div>
+    <div class="chart-card"><h3>Therapeutic Intent</h3><canvas id="c_mentions_therapeutic_intent"></canvas></div>
+    <div class="chart-card"><h3>Dose Distribution</h3><canvas id="c_mentions_dose"></canvas></div>
+    <div class="chart-card"><h3>Duration</h3><canvas id="c_experience_duration_mentioned"></canvas></div>
+    <div class="chart-card"><h3>Time Loop</h3><canvas id="c_time_appeared_to_loop"></canvas></div>
+    <div class="chart-card"><h3>What Went Wrong</h3><canvas id="c_knows_what_went_wrong_if_any"></canvas></div>
+    <div class="chart-card"><h3>Solo vs Group</h3><canvas id="c_solo_or_group"></canvas></div>
+  </div>
+
+  <!-- SECTION A BARS -->
+  <div class="bar-section">
+    <h2>Section A — Experience Overview</h2>
+    <div class="bar-grid" id="sectionA"></div>
+  </div>
+
+  <!-- ASC HEATMAP — YES % -->
+  <div class="bar-section">
+    <h2>5D-ASC — % reporting "yes" per dimension</h2>
+    <div class="heatmap-grid" id="ascHeatmap"></div>
+  </div>
+
+  <!-- ASC FULL BARS -->
+  <div class="bar-section">
+    <h2>5D-ASC — Full Breakdown</h2>
+    <div class="bar-grid" id="sectionB"></div>
+  </div>
+
+  <div id="errorBox" style="display:none"></div>
+</div><!-- end dashMain -->
+</div><!-- end dash-content -->
+</div><!-- end dash-layout -->
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://esgqbozvwefiprkvviyz.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzZ3Fib3p2d2VmaXBya3Z2aXl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2NDIzNzksImV4cCI6MjA4ODIxODM3OX0.YNeMbZrCictzBMORGIHc5axSdTmlsIPxQQE9_drjKWA';
+const TABLE         = 'ShroomsTripRep';
+
+// ── SCHEMA ────────────────────────────────────────────────────────────────────
+const SECTION_A = [
+  'clearly_consumed_psilocybin','prior_psilocybin_use',
+  'used_other_substances_during','recent_prior_use_under_2_weeks',
+  'overall_positive_experience','would_repeat','never_again_statement',
+  'set_and_setting_mentioned','had_difficult_challenging_experience',
+  'mentions_therapeutic_intent','mentions_dose','experience_duration_mentioned',
+  'time_appeared_to_loop','knows_what_went_wrong_if_any','solo_or_group'
+];
+const SECTION_B = [
+  'asc_felt_in_wonderful_other_world','asc_felt_connected_to_higher_power',
+  'asc_everything_unified_into_oneness','asc_special_meaning_to_everyday_things',
+  'asc_experienced_touch_of_eternity','asc_conflicts_seemed_to_dissolve',
+  'asc_felt_one_with_surroundings','asc_boundaries_between_self_and_world_blurred',
+  'asc_experienced_all_embracing_love','asc_experience_had_religious_aspects',
+  'asc_felt_profound_inner_peace','asc_felt_awe','asc_felt_totally_free',
+  'asc_felt_profound_insight','asc_many_things_seemed_funny',
+  'asc_things_appeared_breathtakingly_beautiful','asc_afraid_state_would_last_forever',
+  'asc_scared_without_knowing_why','asc_afraid_of_losing_control',
+  'asc_felt_threatened','asc_felt_something_terrible_would_happen',
+  'asc_experienced_everything_frighteningly_distorted','asc_saw_things_knew_were_not_real',
+  'asc_saw_patterns_with_closed_eyes','asc_saw_colors_with_closed_eyes',
+  'asc_saw_whole_scenes_with_closed_eyes','asc_things_appeared_smaller_or_larger',
+  'asc_surroundings_appeared_animated_with_life','asc_imagination_was_extremely_vivid',
+  'asc_colors_altered_by_sounds','asc_heard_sounds_without_known_source',
+  'asc_felt_sleepy_or_drowsy','asc_felt_as_if_no_longer_had_body',
+  'asc_had_out_of_body_experience','asc_felt_floating',
+  'asc_sense_of_time_and_space_altered','asc_thoughts_became_disconnected'
+];
+const ALL_FIELDS = [...SECTION_A, ...SECTION_B];
+
+const FILTER_FIELDS = [
+  'f_clearly_consumed_psilocybin','f_prior_psilocybin_use',
+  'f_used_other_substances_during','f_recent_prior_use_under_2_weeks',
+  'f_overall_positive_experience','f_would_repeat','f_never_again_statement',
+  'f_set_and_setting_mentioned','f_had_difficult_challenging_experience',
+  'f_mentions_therapeutic_intent','f_mentions_dose','f_experience_duration_mentioned',
+  'f_time_appeared_to_loop','f_knows_what_went_wrong_if_any','f_solo_or_group'
+];
+
+// ── CHART INSTANCES ───────────────────────────────────────────────────────────
+const charts = {};
+
+// ── COLORS ───────────────────────────────────────────────────────────────────
+function valColor(v) {
+  if (v === 'yes') return '#6dfacc';
+  if (v === 'no')  return '#fa6d8f';
+  if (v === 'unclear' || v === 'unknown') return '#fad06d';
+  const palette = ['#7c6dfa','#fa9f6d','#6db8fa','#fa6dda','#b8fa6d','#fa6d6d','#6dfafa'];
+  let h = 0; for (let c of v) h = (h*31+c.charCodeAt(0))%palette.length;
+  return palette[h];
+}
+
+function heatColor(pct) {
+  // 0% dark, 100% bright accent3
+  const r = Math.round(13 + pct/100*(109-13));
+  const g = Math.round(19 + pct/100*(250-19));
+  const b = Math.round(26 + pct/100*(204-26));
+  return `rgb(${r},${g},${b})`;
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
+async function fetchCount(filters) {
+  const url = buildUrl('head', filters);
+  const res = await fetch(url, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`,
+                Prefer: 'count=exact' }
+  });
+  return parseInt(res.headers.get('content-range')?.split('/')[1] ?? '0');
+}
+
+async function fetchDistribution(field, filters) {
+  // Supabase doesn't have GROUP BY via REST, so we fetch all values for that field
+  // and count client-side — but only select 1 column to minimize data
+  const params = new URLSearchParams();
+  params.set('select', field);
+  applyFilters(params, filters);
+  params.set('limit', '100000');
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?${params}`, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+  });
+  const data = await res.json();
+  const counts = {};
+  for (const row of data) {
+    const v = row[field] ?? 'null';
+    counts[v] = (counts[v] ?? 0) + 1;
+  }
+  return counts;
+}
+
+async function fetchAllDistributions(filters) {
+  // Fetch all fields in one query
+  setLoading('Fetching data…');
+  const params = new URLSearchParams();
+  params.set('select', ALL_FIELDS.join(','));
+  applyFilters(params, filters);
+  params.set('limit', '100000');
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?${params}`, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      Prefer: 'count=exact'
+    }
+  });
+  const total = parseInt(res.headers.get('content-range')?.split('/')[1] ?? '0');
+  const data = await res.json();
+
+  // Count distributions for all fields
+  const dists = {};
+  for (const f of ALL_FIELDS) dists[f] = {};
+  for (const row of data) {
+    for (const f of ALL_FIELDS) {
+      const v = row[f] ?? 'null';
+      dists[f][v] = (dists[f][v] ?? 0) + 1;
+    }
+  }
+  return { total: total || data.length, dists, n: data.length };
+}
+
+function buildUrl(type, filters) {
+  const params = new URLSearchParams();
+  if (type === 'head') params.set('select', 'id');
+  applyFilters(params, filters);
+  return `${SUPABASE_URL}/rest/v1/${TABLE}?${params}`;
+}
+
+function applyFilters(params, filters) {
+  for (const [col, val] of Object.entries(filters)) {
+    if (val) params.set(col, `eq.${val}`);
+  }
+}
+
+function getFilters() {
+  const f = {};
+  FILTER_FIELDS.forEach(id => {
+    const col = id.replace('f_', '');
+    const val = document.getElementById(id).value;
+    if (val) f[col] = val;
+  });
+  return f;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function makeDonut(canvasId, dist, title) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  if (charts[canvasId]) charts[canvasId].destroy();
+  const labels = Object.keys(dist);
+  const values = Object.values(dist);
+  charts[canvasId] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: labels.map(valColor),
+                   borderColor: '#13131a', borderWidth: 3 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#e8e8f0', font: { family: 'DM Mono', size: 11 }, padding: 12 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} (${(ctx.parsed/ctx.dataset.data.reduce((a,b)=>a+b,0)*100).toFixed(1)}%)` } }
+      }
+    }
+  });
+}
+
+function renderStatCards(n, dists) {
+  const grid = document.getElementById('statGrid');
+  const tripYes = dists['trip_report']?.['yes'] ?? 0;
+  const posYes  = dists['overall_positive_experience']?.['yes'] ?? 0;
+  const diffYes = dists['had_difficult_challenging_experience']?.['yes'] ?? 0;
+  const repeatYes = dists['would_repeat']?.['yes'] ?? 0;
+  const firstTime = dists['prior_psilocybin_use']?.['no'] ?? 0;
+
+  const otherSubst = dists['used_other_substances_during']?.['yes'] ?? 0;
+  const neverAgain = dists['never_again_statement']?.['yes'] ?? 0;
+  const cards = [
+    { val: n.toLocaleString(),                              lbl: 'Total Records' },
+    { val: n ? (posYes/n*100).toFixed(1)+'%' : '—',        lbl: 'Positive Experience' },
+    { val: n ? (diffYes/n*100).toFixed(1)+'%' : '—',       lbl: 'Difficult Experience' },
+    { val: n ? (repeatYes/n*100).toFixed(1)+'%' : '—',     lbl: 'Would Repeat' },
+    { val: n ? (firstTime/n*100).toFixed(1)+'%' : '—',     lbl: 'First Timers' },
+    { val: n ? (otherSubst/n*100).toFixed(1)+'%' : '—',    lbl: 'Other Substances' },
+    { val: n ? (neverAgain/n*100).toFixed(1)+'%' : '—',    lbl: 'Never Again' },
+  ];
+  grid.innerHTML = cards.map(c => `
+    <div class="stat-card">
+      <div class="val">${c.val}</div>
+      <div class="lbl">${c.lbl}</div>
+    </div>`).join('');
+}
+
+function renderCharts(dists) {
+  const chartFields = [
+    'clearly_consumed_psilocybin','prior_psilocybin_use',
+    'used_other_substances_during','recent_prior_use_under_2_weeks',
+    'overall_positive_experience','would_repeat','never_again_statement',
+    'set_and_setting_mentioned','had_difficult_challenging_experience',
+    'mentions_therapeutic_intent','mentions_dose','experience_duration_mentioned',
+    'time_appeared_to_loop','knows_what_went_wrong_if_any','solo_or_group'
+  ];
+  for (const f of chartFields) {
+    makeDonut('c_' + f, dists[f] ?? {}, f.replace(/_/g,' '));
+  }
+}
+
+function renderBarSection(containerId, fields, dists) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = fields.map(f => {
+    const dist = dists[f] ?? {};
+    const total = Object.values(dist).reduce((a,b)=>a+b,0) || 1;
+    const label = f.replace(/^asc_/, '').replace(/_/g, ' ');
+    const bars = Object.entries(dist).sort((a,b)=>b[1]-a[1]).map(([v,n]) => {
+      const pct = (n/total*100).toFixed(1);
+      const cls = v === 'yes' ? 'fill-yes' : v === 'no' ? 'fill-no' : v === 'unclear' || v === 'unknown' ? 'fill-unclear' : 'fill-other';
+      return `<div class="bar-item">
+        <div class="bar-item-label">${v}</div>
+        <div class="bar-item-track"><div class="bar-item-fill ${cls}" style="width:${pct}%"></div></div>
+        <div class="bar-item-pct">${pct}%</div>
+      </div>`;
+    }).join('');
+    return `<div class="bar-row">
+      <div class="bar-row-label" title="${f}">${label}</div>
+      <div class="bar-row-bars">${bars}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderAscHeatmap(dists, n) {
+  const container = document.getElementById('ascHeatmap');
+  container.innerHTML = SECTION_B.map(f => {
+    const yes = dists[f]?.['yes'] ?? 0;
+    const pct = n ? (yes/n*100) : 0;
+    const label = f.replace(/^asc_/, '').replace(/_/g, ' ');
+    const bg = heatColor(pct);
+    const textColor = pct > 50 ? '#0a0a0f' : '#e8e8f0';
+    return `<div class="heatmap-cell" style="background:${bg}20; border-color:${bg}40">
+      <div class="hm-label" style="color:${textColor === '#0a0a0f' ? '#e8e8f0' : textColor}">${label}</div>
+      <div class="hm-pct" style="color:${bg}">${pct.toFixed(0)}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ── MAIN LOAD ─────────────────────────────────────────────────────────────────
+async function load() {
+  showLoading(true);
+  try {
+    const filters = getFilters();
+    const { total, dists, n } = await fetchAllDistributions(filters);
+
+    document.getElementById('totalBadge').textContent = `${n.toLocaleString()} records`;
+    renderStatCards(n, dists);
+    renderCharts(dists);
+    renderBarSection('sectionA', SECTION_A, dists);
+    renderAscHeatmap(dists, n);
+    renderBarSection('sectionB', SECTION_B, dists);
+
+    document.getElementById('dashMain').style.display = 'block';
+  } catch(e) {
+    const box = document.getElementById('errorBox');
+    box.style.display = 'block';
+    const isCors = e.message.includes('fetch') || e.message.includes('CORS') || e.message.includes('Failed');
+    const hint = isCors
+      ? '<br><br><strong>⚠️ CORS hiba:</strong> A fájlt nem lehet <code>file://</code> protokollról megnyitni.<br>Megoldás:<br>• Töltsd fel egy webszerverre (GitHub Pages, Netlify, stb.)<br>• Vagy futtass lokálisan: <code>python -m http.server 8080</code> és nyisd meg: <code>http://localhost:8080</code>'
+      : '<br><br>Ellenőrizd: tábla neve, anon key, RLS policy.';
+    box.innerHTML = \`<div class="error-box">❌ Error: \${e.message}\${hint}</div>\`;
+    document.getElementById('dashMain').style.display = 'block';
+  }
+  showLoading(false);
+}
+
+function showLoading(v) {
+  document.getElementById('loadingOverlay').style.display = v ? 'flex' : 'none';
+}
+function setLoading(msg) {
+  document.getElementById('loadingText').textContent = msg;
+}
+
+function resetFilters() {
+  FILTER_FIELDS.forEach(id => {
+    document.getElementById(id).value = '';
+    document.getElementById(id).classList.remove('has-value');
+  });
+  updateFilterBadge();
+  load();
+}
+
+function toggleMobileSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('mobile-open');
+  overlay.classList.toggle('open');
+}
+
+function updateFilterBadge() {
+  const active = FILTER_FIELDS.filter(id => document.getElementById(id).value !== '').length;
+  const badge = document.getElementById('filterBadge');
+  badge.textContent = active;
+  badge.classList.toggle('visible', active > 0);
+  // highlight active selects
+  FILTER_FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.toggle('has-value', el.value !== '');
+  });
+}
+
+// ── DEBOUNCED FILTER CHANGE ───────────────────────────────────────────────────
+let debounceTimer;
+FILTER_FIELDS.forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    updateFilterBadge();
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(load, 300);
+  });
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+load();
+</script>
+</body>
+</html>
