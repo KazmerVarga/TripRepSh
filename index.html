@@ -137,7 +137,10 @@
   }
   .stat-card:hover { border-color: var(--accent); }
   .stat-card .val { font-size: 2rem; font-weight: 800; line-height: 1; color: var(--accent3); font-family: 'DM Mono', monospace; }
+  .stat-card .val-sub { font-size: 1rem; color: var(--muted); }
   .stat-card .lbl { font-size: 0.7rem; color: var(--muted); margin-top: 0.35rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-card-alert { border-color: var(--accent2) !important; }
+  .stat-card-alert .val { color: var(--accent2); }
 
   /* ── CHART GRID ── */
   .chart-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
@@ -166,6 +169,83 @@
   .fill-unclear { background: var(--unclear); }
   .fill-other { background: var(--accent); }
 
+  /* ── BROWSE BUTTON ── */
+  .btn-browse {
+    background: var(--surface2); border: 1px solid var(--accent); color: var(--accent);
+    border-radius: 10px; padding: 0.55rem 1.25rem; font-family: 'DM Mono', monospace;
+    font-size: 0.82rem; cursor: pointer; transition: all 0.2s; letter-spacing: 0.03em;
+  }
+  .btn-browse:hover, .btn-browse.active { background: var(--accent); color: #0a0a0f; }
+
+  /* ── BROWSE TABLE ── */
+  .browse-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+  .browse-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .browse-table thead tr { background: var(--surface2); }
+  .browse-table th { padding: 0.75rem 1rem; text-align: left; font-size: 0.68rem;
+    text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);
+    border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .browse-table td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--border);
+    vertical-align: middle; }
+  .browse-table tbody tr { cursor: pointer; transition: background 0.15s; }
+  .browse-table tbody tr:hover { background: var(--surface2); }
+  .browse-table tbody tr:last-child td { border-bottom: none; }
+  .browse-table .td-id { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); }
+  .browse-table .td-title { color: var(--text); max-width: 300px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap; }
+  .pill { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 999px;
+    font-size: 0.68rem; font-family: 'DM Mono', monospace; }
+  .pill-yes { background: #6dfacc22; color: var(--yes); border: 1px solid #6dfacc44; }
+  .pill-no  { background: #fa6d8f22; color: var(--no);  border: 1px solid #fa6d8f44; }
+  .pill-other { background: #7c6dfa22; color: var(--accent); border: 1px solid #7c6dfa44; }
+  .btn-page {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 7px; padding: 0.3rem 0.75rem; font-family: 'DM Mono', monospace;
+    font-size: 0.78rem; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-page:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-page.current { background: var(--accent); color: #0a0a0f; border-color: var(--accent); }
+  .btn-page:disabled { opacity: 0.3; cursor: default; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    z-index: 500; align-items: center; justify-content: center; padding: 1rem;
+    backdrop-filter: blur(6px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    max-width: 780px; width: 100%; max-height: 88vh; overflow-y: auto;
+    padding: 2rem; position: relative;
+  }
+  .modal-box::-webkit-scrollbar { width: 4px; }
+  .modal-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .modal-close {
+    position: sticky; top: 0; float: right; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted); border-radius: 8px;
+    padding: 0.25rem 0.6rem; cursor: pointer; font-size: 0.9rem; transition: all 0.15s;
+    z-index: 1;
+  }
+  .modal-close:hover { color: var(--accent2); border-color: var(--accent2); }
+  .modal-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.25rem; padding-right: 2rem; }
+  .modal-id { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); margin-bottom: 1.25rem; }
+  .modal-text {
+    font-size: 0.85rem; line-height: 1.75; color: #c8c8d8;
+    white-space: pre-wrap; word-break: break-word;
+    background: var(--surface2); border-radius: 10px; padding: 1.25rem;
+    margin-bottom: 1.5rem; max-height: 300px; overflow-y: auto;
+    border: 1px solid var(--border);
+  }
+  .modal-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.5rem; }
+  .modal-field { background: var(--surface2); border-radius: 8px; padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border); }
+  .modal-field-key { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin-bottom: 0.2rem; }
+  .modal-field-val { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--text); }
+  .modal-section-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--muted); margin: 1rem 0 0.5rem; padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--border); }
+
   /* ── LOADING ── */
   .loading-overlay {
     position: fixed; inset: 0; background: var(--bg); z-index: 999;
@@ -183,11 +263,12 @@
   .heatmap-cell {
     border-radius: 8px; padding: 0.6rem 0.8rem;
     display: flex; justify-content: space-between; align-items: center;
-    border: 1px solid transparent; transition: border-color 0.2s;
+    border: 1px solid transparent; transition: all 0.2s;
+    border-left-width: 3px !important;
   }
-  .heatmap-cell:hover { border-color: var(--accent); }
+  .heatmap-cell:hover { transform: translateX(2px); filter: brightness(1.2); }
   .heatmap-cell .hm-label { font-size: 0.68rem; color: var(--text); max-width: 130px; line-height: 1.3; }
-  .heatmap-cell .hm-pct { font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 600; flex-shrink: 0; }
+  .heatmap-cell .hm-pct { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 700; flex-shrink: 0; min-width: 38px; text-align: right; }
 </style>
 </head>
 <body>
@@ -321,6 +402,44 @@
   <!-- STAT CARDS -->
   <div class="stat-grid" id="statGrid"></div>
 
+  <!-- BROWSE BUTTON -->
+  <div style="margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+    <button class="btn-browse" id="btnBrowse" onclick="toggleBrowse()">
+      📋 Browse Trip Reports
+    </button>
+    <span id="browseCount" style="font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--muted)"></span>
+  </div>
+
+  <!-- BROWSE PANEL -->
+  <div id="browsePanel" style="display:none;margin-bottom:2rem">
+    <div class="browse-table-wrap">
+      <table class="browse-table" id="browseTable">
+        <thead>
+          <tr>
+            <th style="width:100px">ID</th>
+            <th>Title</th>
+            <th style="width:120px">Dose</th>
+            <th style="width:90px">Positive</th>
+            <th style="width:90px">Repeat</th>
+            <th style="width:80px">Solo</th>
+          </tr>
+        </thead>
+        <tbody id="browseBody">
+          <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="browsePagination" style="display:flex;gap:0.5rem;align-items:center;margin-top:1rem;flex-wrap:wrap"></div>
+  </div>
+
+  <!-- MODAL -->
+  <div id="reportModal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
   <!-- MAIN CHARTS — all 15 Section A fields -->
   <div class="chart-grid" id="chartGrid">
     <div class="chart-card"><h3>Consumed Psilocybin</h3><canvas id="c_clearly_consumed_psilocybin"></canvas></div>
@@ -350,12 +469,6 @@
   <div class="bar-section">
     <h2>5D-ASC — % reporting "yes" per dimension</h2>
     <div class="heatmap-grid" id="ascHeatmap"></div>
-  </div>
-
-  <!-- ASC FULL BARS -->
-  <div class="bar-section">
-    <h2>5D-ASC — Full Breakdown</h2>
-    <div class="bar-grid" id="sectionB"></div>
   </div>
 
   <div id="errorBox" style="display:none"></div>
@@ -423,11 +536,11 @@ function valColor(v) {
 }
 
 function heatColor(pct) {
-  // 0% dark, 100% bright accent3
-  const r = Math.round(13 + pct/100*(109-13));
-  const g = Math.round(19 + pct/100*(250-19));
-  const b = Math.round(26 + pct/100*(204-26));
-  return `rgb(${r},${g},${b})`;
+  // Low: cool blue, Mid: purple, High: vivid green — always visible
+  if (pct < 20)  return `hsl(220, 70%, ${35 + pct}%)`;       // dark blue → blue
+  if (pct < 40)  return `hsl(${260 - pct*2}, 80%, 60%)`;     // purple
+  if (pct < 60)  return `hsl(${180 + pct/2}, 85%, 55%)`;     // teal
+  return `hsl(${150 - pct/4}, 90%, 58%)`;                     // vivid green
 }
 
 // ── API ───────────────────────────────────────────────────────────────────────
@@ -485,7 +598,32 @@ async function fetchAllDistributions(filters) {
       dists[f][v] = (dists[f][v] ?? 0) + 1;
     }
   }
-  return { total: total || data.length, dists, n: data.length };
+  // ── PSYCHOSIS PROXY SCORE ─────────────────────────────────────────────────
+  // 8 proxy indicators based on ASC research literature:
+  // Hallucinations, thought disorder, ego dissolution, paranoia, loss of control
+  const PSYCHOSIS_INDICATORS = [
+    'asc_saw_things_knew_were_not_real',        // visual hallucination
+    'asc_heard_sounds_without_known_source',     // auditory hallucination
+    'asc_boundaries_between_self_and_world_blurred', // ego dissolution
+    'asc_thoughts_became_disconnected',          // thought disorder
+    'asc_afraid_of_losing_control',              // loss of control fear
+    'asc_felt_something_terrible_would_happen',  // paranoia / doom
+    'asc_experienced_everything_frighteningly_distorted', // terrifying distortion
+    'asc_felt_threatened',                       // persecutory feeling
+  ];
+  // Count rows with score >= 4 (at least half the indicators present)
+  const psychosisRows = data.filter(row =>
+    PSYCHOSIS_INDICATORS.filter(f => row[f] === 'yes').length >= 4
+  );
+  // Distribution of scores 0-8
+  const psychosisScoreDist = {};
+  for (const row of data) {
+    const score = PSYCHOSIS_INDICATORS.filter(f => row[f] === 'yes').length;
+    psychosisScoreDist[score] = (psychosisScoreDist[score] ?? 0) + 1;
+  }
+
+  return { total: total || data.length, dists, n: data.length,
+           psychosisCount: psychosisRows.length, psychosisScoreDist };
 }
 
 function buildUrl(type, filters) {
@@ -535,7 +673,7 @@ function makeDonut(canvasId, dist, title) {
   });
 }
 
-function renderStatCards(n, dists) {
+function renderStatCards(n, dists, psychosisCount, psychosisScoreDist) {
   const grid = document.getElementById('statGrid');
   const tripYes = dists['trip_report']?.['yes'] ?? 0;
   const posYes  = dists['overall_positive_experience']?.['yes'] ?? 0;
@@ -554,9 +692,11 @@ function renderStatCards(n, dists) {
     { val: n ? (otherSubst/n*100).toFixed(1)+'%' : '—',    lbl: 'Other Substances' },
     { val: n ? (neverAgain/n*100).toFixed(1)+'%' : '—',    lbl: 'Never Again' },
   ];
+  const psychosisPct = n ? (psychosisCount/n*100).toFixed(1) : '—';
+  cards.push({ val: `${psychosisCount.toLocaleString()}`, sub: `${psychosisPct}%`, lbl: 'Psychosis Proxy ≥4', alert: true });
   grid.innerHTML = cards.map(c => `
-    <div class="stat-card">
-      <div class="val">${c.val}</div>
+    <div class="stat-card${c.alert ? ' stat-card-alert' : ''}">
+      <div class="val">${c.val}${c.sub ? `<span class="val-sub"> (${c.sub})</span>` : ''}</div>
       <div class="lbl">${c.lbl}</div>
     </div>`).join('');
 }
@@ -599,42 +739,105 @@ function renderBarSection(containerId, fields, dists) {
 
 function renderAscHeatmap(dists, n) {
   const container = document.getElementById('ascHeatmap');
-  container.innerHTML = SECTION_B.map(f => {
+  const heatItems = SECTION_B.map(f => {
     const yes = dists[f]?.['yes'] ?? 0;
     const pct = n ? (yes/n*100) : 0;
+    return { f, pct };
+  }).sort((a, b) => b.pct - a.pct);
+
+  container.innerHTML = heatItems.map(({ f, pct }) => {
     const label = f.replace(/^asc_/, '').replace(/_/g, ' ');
     const bg = heatColor(pct);
-    const textColor = pct > 50 ? '#0a0a0f' : '#e8e8f0';
-    return `<div class="heatmap-cell" style="background:${bg}20; border-color:${bg}40">
-      <div class="hm-label" style="color:${textColor === '#0a0a0f' ? '#e8e8f0' : textColor}">${label}</div>
+    return `<div class="heatmap-cell" style="background:${bg}22; border-left: 3px solid ${bg}; border-color:${bg}">
+      <div class="hm-label">${label}</div>
       <div class="hm-pct" style="color:${bg}">${pct.toFixed(0)}%</div>
     </div>`;
   }).join('');
 }
 
 // ── MAIN LOAD ─────────────────────────────────────────────────────────────────
+function renderPsychosisSection(psychosisCount, scoreDist, n) {
+  const container = document.getElementById('psychosisSection');
+  if (!container) return;
+  const pct = n ? (psychosisCount/n*100).toFixed(1) : 0;
+
+  // Score distribution bar chart
+  const maxScore = Math.max(...Object.values(scoreDist));
+  const scoreBars = Array.from({length:9}, (_,i) => {
+    const count = scoreDist[i] ?? 0;
+    const w = maxScore ? (count/maxScore*100).toFixed(1) : 0;
+    const color = i >= 4 ? `hsl(${360-i*20},85%,60%)` : `hsl(${200+i*10},70%,55%)`;
+    const highlight = i >= 4 ? ' style="font-weight:700"' : '';
+    return `<div class="bar-item">
+      <div class="bar-item-label"${highlight}>${i} ${i>=4?'⚠':''}  </div>
+      <div class="bar-item-track"><div class="bar-item-fill" style="width:${w}%;background:${color}"></div></div>
+      <div class="bar-item-pct">${count.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="chart-grid" style="margin-bottom:1rem">
+      <div class="chart-card stat-card-alert" style="grid-column:span 1">
+        <h3>Psychosis Proxy Score Distribution</h3>
+        <p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;line-height:1.5">
+          Score = number of 8 psychosis-related ASC indicators marked <strong>yes</strong>.<br>
+          <strong style="color:var(--accent2)">≥4 threshold:</strong> ${psychosisCount.toLocaleString()} records (${pct}%)
+        </p>
+        <div class="bar-row-bars">${scoreBars}</div>
+      </div>
+      <div class="chart-card" style="grid-column:span 1">
+        <h3>8 Psychosis Proxy Indicators</h3>
+        <p style="font-size:0.72rem;color:var(--muted);line-height:1.8">
+          1. Saw things knew were not real<br>
+          2. Heard sounds without known source<br>
+          3. Boundaries between self &amp; world blurred<br>
+          4. Thoughts became disconnected<br>
+          5. Afraid of losing control<br>
+          6. Felt something terrible would happen<br>
+          7. Everything frighteningly distorted<br>
+          8. Felt threatened
+        </p>
+        <p style="font-size:0.7rem;color:var(--muted);margin-top:0.75rem;border-top:1px solid var(--border);padding-top:0.75rem">
+          <em>Note: This is a proxy measure based on ASC (Altered States of Consciousness) self-report items, not a clinical diagnosis. High scores indicate psychosis-like phenomenology during the experience.</em>
+        </p>
+      </div>
+    </div>`;
+}
+
 async function load() {
   showLoading(true);
+  // Safety timeout — ha 15s után sem jön válasz, megmutatja a hibát
+  const timeout = setTimeout(() => {
+    showLoading(false);
+    document.getElementById('dashMain').style.display = 'block';
+    const box = document.getElementById('errorBox');
+    box.style.display = 'block';
+    box.innerHTML = '<div class="error-box">⏱ Timeout — nem sikerült csatlakozni a Supabase-hez.<br><br>Lehetséges okok:<br>• A fájlt <code>file://</code> protokollról nyitottad meg → futtasd: <code>python -m http.server 8080</code><br>• A tábla neve nem stimmel (jelenleg: <strong>ShroomsTripRep</strong>)<br>• Az adatok még nincsenek feltöltve a táblába</div>';
+  }, 15000);
+
   try {
     const filters = getFilters();
-    const { total, dists, n } = await fetchAllDistributions(filters);
+    const { total, dists, n, psychosisCount, psychosisScoreDist } = await fetchAllDistributions(filters);
+    clearTimeout(timeout);
 
     document.getElementById('totalBadge').textContent = `${n.toLocaleString()} records`;
-    renderStatCards(n, dists);
-    renderCharts(dists);
+    renderStatCards(n, dists, psychosisCount, psychosisScoreDist);
+    renderCharts(dists, psychosisScoreDist);
     renderBarSection('sectionA', SECTION_A, dists);
     renderAscHeatmap(dists, n);
-    renderBarSection('sectionB', SECTION_B, dists);
+    // sectionB removed
+    // psychosis section removed
 
     document.getElementById('dashMain').style.display = 'block';
   } catch(e) {
+    clearTimeout(timeout);
     const box = document.getElementById('errorBox');
     box.style.display = 'block';
     const isCors = e.message.includes('fetch') || e.message.includes('CORS') || e.message.includes('Failed');
     const hint = isCors
       ? '<br><br><strong>⚠️ CORS hiba:</strong> A fájlt nem lehet <code>file://</code> protokollról megnyitni.<br>Megoldás:<br>• Töltsd fel egy webszerverre (GitHub Pages, Netlify, stb.)<br>• Vagy futtass lokálisan: <code>python -m http.server 8080</code> és nyisd meg: <code>http://localhost:8080</code>'
       : '<br><br>Ellenőrizd: tábla neve, anon key, RLS policy.';
-    box.innerHTML = \`<div class="error-box">❌ Error: \${e.message}\${hint}</div>\`;
+    box.innerHTML = `<div class="error-box">❌ Error: ${e.message}${hint}</div>`;
     document.getElementById('dashMain').style.display = 'block';
   }
   showLoading(false);
@@ -687,6 +890,221 @@ FILTER_FIELDS.forEach(id => {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 load();
+
+// ── BROWSE ────────────────────────────────────────────────────────────────────
+const BROWSE_PAGE_SIZE = 50;
+let browseState = { open: false, page: 1, data: [], loading: false };
+
+function pillVal(v) {
+  if (!v) return '<span class="pill pill-other">—</span>';
+  const cls = v === 'yes' ? 'pill-yes' : v === 'no' ? 'pill-no' : 'pill-other';
+  return `<span class="pill ${cls}">${v}</span>`;
+}
+
+async function loadBrowseData() {
+  const filters = getFilters();
+  browseState.loading = true;
+  document.getElementById('browseBody').innerHTML =
+    '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">Loading...</td></tr>';
+
+  // Join ShroomsTripRep with posts_with_text via id
+  // Fetch classified data with filters
+  const params = new URLSearchParams();
+  params.set('select', 'id,title,overall_positive_experience,would_repeat,solo_or_group,mentions_dose,had_difficult_challenging_experience,clearly_consumed_psilocybin,prior_psilocybin_use,used_other_substances_during,recent_prior_use_under_2_weeks,never_again_statement,set_and_setting_mentioned,mentions_therapeutic_intent,experience_duration_mentioned,time_appeared_to_loop,knows_what_went_wrong_if_any,asc_felt_awe,asc_felt_profound_insight,asc_experienced_all_embracing_love,asc_felt_in_wonderful_other_world,asc_felt_connected_to_higher_power,asc_everything_unified_into_oneness,asc_special_meaning_to_everyday_things,asc_experienced_touch_of_eternity,asc_conflicts_seemed_to_dissolve,asc_felt_one_with_surroundings,asc_boundaries_between_self_and_world_blurred,asc_experience_had_religious_aspects,asc_felt_profound_inner_peace,asc_felt_totally_free,asc_many_things_seemed_funny,asc_things_appeared_breathtakingly_beautiful,asc_afraid_state_would_last_forever,asc_scared_without_knowing_why,asc_afraid_of_losing_control,asc_felt_threatened,asc_felt_something_terrible_would_happen,asc_experienced_everything_frighteningly_distorted,asc_saw_things_knew_were_not_real,asc_saw_patterns_with_closed_eyes,asc_saw_colors_with_closed_eyes,asc_saw_whole_scenes_with_closed_eyes,asc_things_appeared_smaller_or_larger,asc_surroundings_appeared_animated_with_life,asc_imagination_was_extremely_vivid,asc_colors_altered_by_sounds,asc_heard_sounds_without_known_source,asc_felt_sleepy_or_drowsy,asc_felt_as_if_no_longer_had_body,asc_had_out_of_body_experience,asc_felt_floating,asc_sense_of_time_and_space_altered,asc_thoughts_became_disconnected');
+  applyFilters(params, filters);
+  params.set('limit', '10000');
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?${params}`, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+  });
+  const classified = await res.json();
+  browseState.data = classified;
+  browseState.page = 1;
+  browseState.loading = false;
+
+  const total = classified.length;
+  document.getElementById('browseCount').textContent = `${total.toLocaleString()} records`;
+  renderBrowsePage();
+}
+
+function renderBrowsePage() {
+  const { data, page } = browseState;
+  const start = (page - 1) * BROWSE_PAGE_SIZE;
+  const pageData = data.slice(start, start + BROWSE_PAGE_SIZE);
+
+  const tbody = document.getElementById('browseBody');
+  tbody.innerHTML = pageData.map(r => `
+    <tr onclick="openModal('${r.id}')">
+      <td class="td-id">${r.id}</td>
+      <td class="td-title" title="${(r.title||'').replace(/"/g,'&quot;')}">${r.title || '—'}</td>
+      <td>${r.mentions_dose || '—'}</td>
+      <td>${pillVal(r.overall_positive_experience)}</td>
+      <td>${pillVal(r.would_repeat)}</td>
+      <td>${pillVal(r.solo_or_group === 'solo' ? 'yes' : r.solo_or_group === 'group' ? 'no' : null)}<span style="font-size:0.68rem;color:var(--muted)">${r.solo_or_group||'—'}</span></td>
+    </tr>`).join('');
+
+  renderPagination(data.length, page);
+}
+
+function renderPagination(total, current) {
+  const pages = Math.ceil(total / BROWSE_PAGE_SIZE);
+  const el = document.getElementById('browsePagination');
+  if (pages <= 1) { el.innerHTML = ''; return; }
+
+  let html = `<button class="btn-page" onclick="browsePage(${current-1})" ${current===1?'disabled':''}>← Prev</button>`;
+  const range = [];
+  for (let i = 1; i <= pages; i++) {
+    if (i === 1 || i === pages || (i >= current-2 && i <= current+2)) range.push(i);
+    else if (range[range.length-1] !== '...') range.push('...');
+  }
+  for (const p of range) {
+    if (p === '...') html += `<span style="color:var(--muted);padding:0 0.25rem">…</span>`;
+    else html += `<button class="btn-page ${p===current?'current':''}" onclick="browsePage(${p})">${p}</button>`;
+  }
+  html += `<button class="btn-page" onclick="browsePage(${current+1})" ${current===pages?'disabled':''}>Next →</button>`;
+  html += `<span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);margin-left:0.5rem">${total.toLocaleString()} total</span>`;
+  el.innerHTML = html;
+}
+
+function browsePage(p) {
+  browseState.page = p;
+  renderBrowsePage();
+  document.getElementById('browsePanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function toggleBrowse() {
+  const panel = document.getElementById('browsePanel');
+  const btn = document.getElementById('btnBrowse');
+  browseState.open = !browseState.open;
+  panel.style.display = browseState.open ? 'block' : 'none';
+  btn.classList.toggle('active', browseState.open);
+  if (browseState.open && browseState.data.length === 0) {
+    await loadBrowseData();
+  }
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+const SECTION_A_LABELS = {
+  'clearly_consumed_psilocybin': 'Consumed Psilocybin',
+  'prior_psilocybin_use': 'Prior Use',
+  'used_other_substances_during': 'Other Substances',
+  'recent_prior_use_under_2_weeks': 'Recent Prior Use (<2w)',
+  'overall_positive_experience': 'Overall Positive',
+  'would_repeat': 'Would Repeat',
+  'never_again_statement': 'Never Again',
+  'set_and_setting_mentioned': 'Set & Setting',
+  'had_difficult_challenging_experience': 'Difficult Experience',
+  'mentions_therapeutic_intent': 'Therapeutic Intent',
+  'mentions_dose': 'Dose',
+  'experience_duration_mentioned': 'Duration',
+  'time_appeared_to_loop': 'Time Loop',
+  'knows_what_went_wrong_if_any': 'What Went Wrong',
+  'solo_or_group': 'Solo / Group',
+};
+
+const SECTION_B_LABELS = {
+  'asc_felt_in_wonderful_other_world': 'Wonderful Other World',
+  'asc_felt_connected_to_higher_power': 'Connected to Higher Power',
+  'asc_everything_unified_into_oneness': 'Unified Into Oneness',
+  'asc_special_meaning_to_everyday_things': 'Special Meaning to Things',
+  'asc_experienced_touch_of_eternity': 'Touch of Eternity',
+  'asc_conflicts_seemed_to_dissolve': 'Conflicts Dissolved',
+  'asc_felt_one_with_surroundings': 'One With Surroundings',
+  'asc_boundaries_between_self_and_world_blurred': 'Ego Boundaries Blurred',
+  'asc_experienced_all_embracing_love': 'All-Embracing Love',
+  'asc_experience_had_religious_aspects': 'Religious Aspects',
+  'asc_felt_profound_inner_peace': 'Profound Inner Peace',
+  'asc_felt_awe': 'Felt Awe',
+  'asc_felt_totally_free': 'Felt Totally Free',
+  'asc_felt_profound_insight': 'Profound Insight',
+  'asc_many_things_seemed_funny': 'Things Seemed Funny',
+  'asc_things_appeared_breathtakingly_beautiful': 'Breathtaking Beauty',
+  'asc_afraid_state_would_last_forever': 'Afraid State Would Last',
+  'asc_scared_without_knowing_why': 'Unexplained Fear',
+  'asc_afraid_of_losing_control': 'Afraid of Losing Control',
+  'asc_felt_threatened': 'Felt Threatened',
+  'asc_felt_something_terrible_would_happen': 'Sense of Doom',
+  'asc_experienced_everything_frighteningly_distorted': 'Frightening Distortion',
+  'asc_saw_things_knew_were_not_real': 'Visual Hallucinations',
+  'asc_saw_patterns_with_closed_eyes': 'Patterns (Eyes Closed)',
+  'asc_saw_colors_with_closed_eyes': 'Colors (Eyes Closed)',
+  'asc_saw_whole_scenes_with_closed_eyes': 'Scenes (Eyes Closed)',
+  'asc_things_appeared_smaller_or_larger': 'Size Distortion',
+  'asc_surroundings_appeared_animated_with_life': 'Surroundings Animated',
+  'asc_imagination_was_extremely_vivid': 'Vivid Imagination',
+  'asc_colors_altered_by_sounds': 'Synesthesia',
+  'asc_heard_sounds_without_known_source': 'Auditory Hallucinations',
+  'asc_felt_sleepy_or_drowsy': 'Felt Sleepy',
+  'asc_felt_as_if_no_longer_had_body': 'Body Disappeared',
+  'asc_had_out_of_body_experience': 'Out-of-Body Experience',
+  'asc_felt_floating': 'Felt Floating',
+  'asc_sense_of_time_and_space_altered': 'Time/Space Altered',
+  'asc_thoughts_became_disconnected': 'Disconnected Thoughts',
+};
+
+async function openModal(id) {
+  const modal = document.getElementById('reportModal');
+  const content = document.getElementById('modalContent');
+  modal.classList.add('open');
+  content.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted)">Loading…</div>';
+
+  // Find classified data from browseState
+  const classified = browseState.data.find(r => r.id === id) || {};
+
+  // Fetch full text from posts_with_text table
+  let selftext = '';
+  let postTitle = classified.title || id;
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/posts_with_text?id=eq.${id}&select=title,selftext&limit=1`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    const data = await res.json();
+    if (data.length > 0) {
+      selftext  = data[0].selftext || '';
+      postTitle = data[0].title || postTitle;
+    }
+  } catch(e) { selftext = '(Could not load text)'; }
+
+  // Build Section A fields
+  const secAhtml = Object.entries(SECTION_A_LABELS).map(([k, label]) => {
+    const v = classified[k] || '—';
+    const cls = v === 'yes' ? 'pill-yes' : v === 'no' ? 'pill-no' : 'pill-other';
+    return `<div class="modal-field">
+      <div class="modal-field-key">${label}</div>
+      <div class="modal-field-val"><span class="pill ${cls}">${v}</span></div>
+    </div>`;
+  }).join('');
+
+  // Build Section B — only show YES values prominently, others dimmed
+  const secBhtml = Object.entries(SECTION_B_LABELS).map(([k, label]) => {
+    const v = classified[k] || '—';
+    const cls = v === 'yes' ? 'pill-yes' : v === 'no' ? 'pill-no' : 'pill-other';
+    const dimmed = v === 'no' ? 'opacity:0.4' : '';
+    return `<div class="modal-field" style="${dimmed}">
+      <div class="modal-field-key">${label}</div>
+      <div class="modal-field-val"><span class="pill ${cls}">${v}</span></div>
+    </div>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="modal-title">${postTitle}</div>
+    <div class="modal-id">id: ${id}</div>
+    <div class="modal-text">${selftext || '(No text available)'}</div>
+    <div class="modal-section-title">Section A — Experience</div>
+    <div class="modal-fields">${secAhtml}</div>
+    <div class="modal-section-title">5D-ASC — Altered States</div>
+    <div class="modal-fields">${secBhtml}</div>
+  `;
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('reportModal')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('reportModal').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
 </script>
 </body>
 </html>
